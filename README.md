@@ -11,11 +11,9 @@ Simplificar a escrita de HTML utilizando uma sintaxe baseada em chaves `{}` para
 **SMKL:**
 
 ```smkl
-div(class="container", id="principal"){
-    h1{ "Título" }
-    |br|
-    img(src="imagem.png", alt="Exemplo")
-}
+<span style="color: #ff7b72;">div</span><span style="color: #d2a8ff;">(class</span><span style="color: #ff7b72;">=</span><span style="color: #a5d6ff;">"container"</span><span style="color: #d2a8ff;">)</span><span style="color: #f0f6fc;">{</span>
+    <span style="color: #7ee787;">"Título"</span>
+<span style="color: #f0f6fc;">}</span>
 
 ```
 
