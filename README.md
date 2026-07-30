@@ -9,7 +9,7 @@ Simplificar a escrita de HTML utilizando uma sintaxe baseada em chaves `{}` para
 ## Exemplo
 
 **SMKL:**
-```scss
+```css
 div(class="container", id="principal"){
     h1{ "Título" }
     |br|
