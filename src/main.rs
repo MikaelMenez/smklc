@@ -12,10 +12,10 @@ use std::fs;
 
 
  */
-fn get_tag(txt: &[char]) -> Vec<Tag> {
+fn get_tag(txt: &[char]) -> Vec<Tags> {
     let mut ptr1: usize = 0;
     let mut ptr2: usize = 0;
-    let mut tags: Vec<Tag> = vec![];
+    let mut tags: Vec<Tags> = vec![];
     let mut i = 0;
     while i < txt.len() {
         let mut actual = txt[i];
@@ -29,12 +29,10 @@ fn get_tag(txt: &[char]) -> Vec<Tag> {
                 actual = txt[i];
             }
             ptr2 = i;
-            tags.push(Tag {
-                name: txt[ptr1..=ptr2].iter().collect::<String>(),
-                atributtes: Vec::with_capacity(1),
-                content: String::new(),
-                tag: None,
-            });
+            tags.push(Tags::VoidTag(VoidTag::new(
+                txt[ptr1..=ptr2].iter().collect::<String>(),
+                Vec::with_capacity(1),
+            )));
             ptr1 = i;
         }
         i += 1;
@@ -51,9 +49,26 @@ struct Tag {
     name: String,
     atributtes: Vec<Atributte>,
     content: String,
-    tag: Option<Box<Tag>>,
+    tag: Option<Box<Tags>>,
 }
-
+#[derive(Debug)]
+enum Tags {
+    VoidTag(VoidTag),
+    Tag(Tag),
+}
+#[derive(Debug)]
+struct VoidTag {
+    name: String,
+    atributtes: Vec<Atributte>,
+}
+impl VoidTag {
+    fn new(name: String, atributtes: Vec<Atributte>) -> Self {
+        VoidTag {
+            name: name,
+            atributtes: atributtes,
+        }
+    }
+}
 fn main() {
     let mut arq: String = fs::read_to_string("test.smkl").unwrap();
     arq = arq.trim().to_string();
