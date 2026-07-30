@@ -12,14 +12,19 @@ use std::fs;
 
 
  */
-
-struct Stag {
+struct Atributte {
     name: String,
-    tag: Option<Box<Stag>>,
+    content: String,
 }
-enum Tag {
-    Class(String),
-    Id(String),
+struct Tag {
+    name: String,
+    atributte: Atributte,
+    content: String,
+    tag: Option<Box<Tags>>,
+}
+enum Tags {
+    Stag(String),
+    Tag(Tag),
 }
 fn main() {
     let mut arq: String = fs::read_to_string("test.smkl").unwrap();
