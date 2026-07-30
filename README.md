@@ -10,7 +10,7 @@ Simplificar a escrita de HTML utilizando uma sintaxe baseada em chaves `{}` para
 
 **SMKL:**
 
-```smkl
+```html
 <span style="color: #ff7b72;">div</span><span style="color: #d2a8ff;">(class</span><span style="color: #ff7b72;">=</span><span style="color: #a5d6ff;">"container"</span><span style="color: #d2a8ff;">)</span><span style="color: #f0f6fc;">{</span>
     <span style="color: #7ee787;">"Título"</span>
 <span style="color: #f0f6fc;">}</span>
