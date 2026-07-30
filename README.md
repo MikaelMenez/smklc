@@ -12,8 +12,8 @@ Simplificar a escrita de HTML utilizando uma sintaxe baseada em chaves `{}` para
 ```css
 div(class="container", id="principal"){
     h1{ "Título" }
-    br||
-    img(src="imagem.png", alt="Exemplo")||
+    |br|
+    |img(src="imagem.png", alt="Exemplo")|
 }
 ```
 se traduz para :
