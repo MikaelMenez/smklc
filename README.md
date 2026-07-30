@@ -9,23 +9,9 @@ Simplificar a escrita de HTML utilizando uma sintaxe baseada em chaves `{}` para
 ## Exemplo
 
 **SMKL:**
-
-```xml
-<div(class="container", id="principal")>{
-    <h1{ "Título" }>
-    <br>
-    <img(src="imagem.png", alt="Exemplo")>
-}
-
-```
-
-**HTML:**
-
 ```html
-<div class="container" id="principal">
-    <h1>Título</h1>
-    <br>
-    <img src="imagem.png" alt="Exemplo">
-</div>
-
-```
+<span style="color: #ff7b72;">div</span><span style="color: #d2a8ff;">(class</span><span style="color: #ff7b72;">=</span><span style="color: #a5d6ff;">"container"</span><span style="color: #d2a8ff;">,</span> <span style="color: #d2a8ff;">id</span><span style="color: #ff7b72;">=</span><span style="color: #a5d6ff;">"principal"</span><span style="color: #d2a8ff;">)</span><span style="color: #f0f6fc;">{</span>
+    <span style="color: #ff7b72;">h1</span><span style="color: #f0f6fc;">{</span> <span style="color: #7ee787;">"Título"</span> <span style="color: #f0f6fc;">}</span>
+    <span style="color: #ff7b72;">br</span>
+    <span style="color: #ff7b72;">img</span><span style="color: #d2a8ff;">(src</span><span style="color: #ff7b72;">=</span><span style="color: #a5d6ff;">"imagem.png"</span><span style="color: #d2a8ff;">,</span> <span style="color: #d2a8ff;">alt</span><span style="color: #ff7b72;">=</span><span style="color: #a5d6ff;">"Exemplo"</span><span style="color: #d2a8ff;">)</span>
+<span style="color: #f0f6fc;">}</span>
