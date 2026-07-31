@@ -12,6 +12,21 @@ use std::fs;
 
 
  */
+fn get_void_tag(text: &[char]) -> (VoidTag, usize) {
+    let mut tag: VoidTag;
+    let mut i: usize = 0;
+    while text[i] != '(' {
+        i += 1;
+    }
+    let name: String = text[0..i].iter().collect();
+    i += 1;
+    let (attrs, offset) = get_attrs(&text[i..]);
+    tag = VoidTag {
+        name,
+        atributtes: attrs,
+    };
+    (tag, i + offset + 1)
+}
 fn get_attrs(text: &[char]) -> (Vec<Atributte>, usize) {
     let mut attrs = vec![];
     let mut ptr: usize = 0;
@@ -79,5 +94,5 @@ fn main() {
     arq = arq.trim().to_string();
     println!("{arq}\n\n\n");
 
-    println!("{:?}", get_attrs(&arq.chars().collect::<Vec<char>>()));
+    println!("{:?}", get_void_tag(&arq.chars().collect::<Vec<char>>()));
 }
