@@ -15,25 +15,33 @@ use std::fs;
 fn get_attrs(text: &[char]) -> Vec<Atributte> {
     let mut attrs = vec![];
     let mut ptr: usize = 0;
-    let mut offset: usize = 0;
     let mut i: usize = 0;
-    while text[i] != '=' {
-        i += 1;
-    }
-    offset = i - offset;
-    let name: String = text[ptr..ptr + offset].iter().collect();
+    loop {
+        if i >= text.len() {
+            break;
+        }
+        while text[i] != '=' {
+            i += 1;
+        }
 
-    offset = 0;
-    i += 2;
-    ptr = i; //olha aq
-    while text[i] != '\"' {
-        println!("{}", text[i]);
-        i += 1
+        let name: String = text[ptr..i].iter().collect();
+
+        i += 2;
+        ptr = i; //olha aq
+        while text[i] != '\"' {
+            i += 1
+        }
+
+        let content: String = text[ptr..i].iter().collect();
+        attrs.push(Atributte { name, content });
+        i += 1;
+        if i < text.len() && text[i] == ',' {
+            i += 1;
+            ptr = i;
+        } else {
+            break;
+        }
     }
-    offset = i - offset;
-    println!("{ptr} {offset}");
-    let content: String = text[ptr..offset].iter().collect();
-    attrs.push(Atributte { name, content });
     attrs
 }
 #[derive(Debug)]
