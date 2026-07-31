@@ -12,7 +12,7 @@ use std::fs;
 
 
  */
-fn get_attrs(text: &[char]) -> Vec<Atributte> {
+fn get_attrs(text: &[char]) -> (Vec<Atributte>, usize) {
     let mut attrs = vec![];
     let mut ptr: usize = 0;
     let mut i: usize = 0;
@@ -42,7 +42,7 @@ fn get_attrs(text: &[char]) -> Vec<Atributte> {
             break;
         }
     }
-    attrs
+    (attrs, i + 2)
 }
 #[derive(Debug)]
 struct Atributte {
