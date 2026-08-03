@@ -1,5 +1,27 @@
-div(class="oi"){
-    h1{"gay"}
-    |img(src="aaaaa",class="id")| |br| |br|
-    "conteudo"
+html(lang="pt-BR"){
+    head{
+        title{"Minha Página em SMKL"}
+        |meta(charset="UTF-8")|
+    }
+    body{
+        header(class="header-main"){
+            h1{"Bem-vindo ao meu site"}
+            p{"Página gerada via transpilador SMKL."}
+        }
+
+        main(class="container", id="app"){
+            section(class="card"){
+                h2{"Galeria"}
+                |img(src="avatar.png", alt="Foto de Perfil")|
+                |br| |br|
+                p{"Esta é uma demonstração de " "texto inline com tags."}
+            }
+
+            |hr|
+
+            footer{
+                p{"© 2026 - Todos os direitos reservados."}
+            }
+        }
+    }
 }

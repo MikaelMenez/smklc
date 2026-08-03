@@ -1,4 +1,5 @@
-use std::{fs, io::Read};
+use std::env;
+use std::fs;
 
 #[derive(Debug, Clone)]
 pub struct Attribute {
@@ -25,34 +26,55 @@ pub struct VoidTag {
     pub name: String,
     pub attributes: Vec<Attribute>,
 }
+
 impl Node {
-    pub fn to_html(&self) -> String {
+    pub fn to_html(&self, indent: usize) -> String {
         match self {
-            Node::Tag(tag) => tag.to_html(),
-            Node::VoidTag(vt) => vt.to_html(),
-            Node::Text(text) => text.clone(),
+            Node::Tag(tag) => tag.to_html(indent),
+            Node::VoidTag(vt) => vt.to_html(indent),
+            Node::Text(text) => format!("{}{}", "  ".repeat(indent), text),
         }
     }
 }
 
 impl Tag {
-    pub fn to_html(&self) -> String {
+    pub fn to_html(&self, indent: usize) -> String {
+        let padding = "  ".repeat(indent);
         let attrs = format_attributes(&self.attributes);
-        let children: Vec<String> = self.children.iter().map(|c| c.to_html()).collect();
+
+        if self.children.len() == 1 {
+            if let Node::Text(txt) = &self.children[0] {
+                return format!("{}<{}{}>{}</{}>", padding, self.name, attrs, txt, self.name);
+            }
+        }
+
+        if self.children.is_empty() {
+            return format!("{}<{}{}></{}>", padding, self.name, attrs, self.name);
+        }
+
+        let children_html: Vec<String> = self
+            .children
+            .iter()
+            .map(|c| c.to_html(indent + 1))
+            .collect();
+
         format!(
-            "<{}{}>{}</{}>",
+            "{}<{}{}>\n{}\n{}</{}>",
+            padding,
             self.name,
             attrs,
-            children.join(" "),
+            children_html.join("\n"),
+            padding,
             self.name
         )
     }
 }
 
 impl VoidTag {
-    pub fn to_html(&self) -> String {
+    pub fn to_html(&self, indent: usize) -> String {
+        let padding = "  ".repeat(indent);
         let attrs = format_attributes(&self.attributes);
-        format!("<{}{}>", self.name, attrs)
+        format!("{}<{}{}>", padding, self.name, attrs)
     }
 }
 
@@ -101,6 +123,22 @@ impl Parser {
                 break;
             }
         }
+    }
+
+    pub fn parse_document(&mut self) -> Vec<Node> {
+        let mut nodes = Vec::new();
+        while self.peek().is_some() {
+            self.skip_whitespace();
+            if self.peek().is_none() {
+                break;
+            }
+            if let Some(node) = self.parse_node() {
+                nodes.push(node);
+            } else {
+                self.advance();
+            }
+        }
+        nodes
     }
 
     pub fn parse_node(&mut self) -> Option<Node> {
@@ -236,12 +274,39 @@ impl Parser {
     }
 }
 
+pub fn transpile(smkl_code: &str) -> String {
+    let mut parser = Parser::new(smkl_code);
+    let ast_nodes = parser.parse_document();
+
+    ast_nodes
+        .iter()
+        .map(|node| node.to_html(0))
+        .collect::<Vec<String>>()
+        .join("\n")
+}
+
 fn main() {
-    let mut buf = String::new();
-    let mut source = fs::File::open("test.smkl").expect("erro lendo");
-    source.read_to_string(&mut buf);
-    let mut parser = Parser::new(&buf);
-    if let Some(ast) = parser.parse_node() {
-        println!("{}", ast.to_html());
+    let args: Vec<String> = env::args().collect();
+
+    if args.len() < 2 || args.len() > 3 {
+        eprintln!("Uso: {} <origem.smkl> [destino.html]", args[0]);
+        std::process::exit(1);
     }
+
+    let input_path = &args[1];
+    let output_path = if args.len() == 3 {
+        args[2].as_str()
+    } else {
+        "output.html"
+    };
+
+    let source = fs::read_to_string(input_path)
+        .unwrap_or_else(|err| panic!("Erro ao ler o arquivo '{}': {}", input_path, err));
+
+    let html_output = transpile(&source);
+
+    fs::write(output_path, html_output)
+        .unwrap_or_else(|err| panic!("Erro ao salvar em '{}': {}", output_path, err));
+
+    println!("Transpilado com sucesso: {} -> {}", input_path, output_path);
 }
