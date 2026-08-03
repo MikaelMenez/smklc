@@ -44,7 +44,9 @@ impl Tag {
 
         if self.children.len() == 1 {
             if let Node::Text(txt) = &self.children[0] {
-                return format!("{}<{}{}>{}</{}>", padding, self.name, attrs, txt, self.name);
+                if !txt.contains('\n') {
+                    return format!("{}<{}{}>{}</{}>", padding, self.name, attrs, txt, self.name);
+                }
             }
         }
 
@@ -107,6 +109,10 @@ impl Parser {
         self.input.get(self.pos).copied()
     }
 
+    fn peek_next(&self) -> Option<char> {
+        self.input.get(self.pos + 1).copied()
+    }
+
     fn advance(&mut self) -> Option<char> {
         let ch = self.peek();
         if ch.is_some() {
@@ -115,10 +121,23 @@ impl Parser {
         ch
     }
 
-    fn skip_whitespace(&mut self) {
-        while let Some(c) = self.peek() {
-            if c.is_whitespace() {
-                self.advance();
+    fn skip_whitespace_and_comments(&mut self) {
+        loop {
+            while let Some(c) = self.peek() {
+                if c.is_whitespace() {
+                    self.advance();
+                } else {
+                    break;
+                }
+            }
+
+            if self.peek() == Some('/') && self.peek_next() == Some('/') {
+                while let Some(c) = self.peek() {
+                    self.advance();
+                    if c == '\n' {
+                        break;
+                    }
+                }
             } else {
                 break;
             }
@@ -128,7 +147,7 @@ impl Parser {
     pub fn parse_document(&mut self) -> Vec<Node> {
         let mut nodes = Vec::new();
         while self.peek().is_some() {
-            self.skip_whitespace();
+            self.skip_whitespace_and_comments();
             if self.peek().is_none() {
                 break;
             }
@@ -142,7 +161,7 @@ impl Parser {
     }
 
     pub fn parse_node(&mut self) -> Option<Node> {
-        self.skip_whitespace();
+        self.skip_whitespace_and_comments();
         let c = self.peek()?;
 
         if c == '"' {
@@ -170,7 +189,7 @@ impl Parser {
 
     fn parse_tag(&mut self) -> Tag {
         let name = self.parse_identifier();
-        self.skip_whitespace();
+        self.skip_whitespace_and_comments();
 
         let attributes = if self.peek() == Some('(') {
             self.parse_attributes()
@@ -178,22 +197,47 @@ impl Parser {
             Vec::new()
         };
 
-        self.skip_whitespace();
+        self.skip_whitespace_and_comments();
         let mut children = Vec::new();
 
         if self.peek() == Some('{') {
             self.advance();
-            loop {
-                self.skip_whitespace();
-                if self.peek() == Some('}') || self.peek().is_none() {
-                    break;
+
+            if name == "style" || name == "script" {
+                let mut raw_content = String::new();
+                let mut depth = 1;
+
+                while let Some(c) = self.advance() {
+                    if c == '{' {
+                        depth += 1;
+                        raw_content.push(c);
+                    } else if c == '}' {
+                        depth -= 1;
+                        if depth == 0 {
+                            break;
+                        }
+                        raw_content.push(c);
+                    } else {
+                        raw_content.push(c);
+                    }
                 }
-                if let Some(child) = self.parse_node() {
-                    children.push(child);
+
+                children.push(Node::Text(raw_content));
+            } else {
+                loop {
+                    self.skip_whitespace_and_comments();
+                    if self.peek() == Some('}') || self.peek().is_none() {
+                        break;
+                    }
+                    if let Some(child) = self.parse_node() {
+                        children.push(child);
+                    } else {
+                        self.advance();
+                    }
                 }
-            }
-            if self.peek() == Some('}') {
-                self.advance();
+                if self.peek() == Some('}') {
+                    self.advance();
+                }
             }
         }
 
@@ -207,7 +251,7 @@ impl Parser {
     fn parse_void_tag(&mut self) -> VoidTag {
         self.advance();
         let name = self.parse_identifier();
-        self.skip_whitespace();
+        self.skip_whitespace_and_comments();
 
         let attributes = if self.peek() == Some('(') {
             self.parse_attributes()
@@ -215,7 +259,7 @@ impl Parser {
             Vec::new()
         };
 
-        self.skip_whitespace();
+        self.skip_whitespace_and_comments();
         if self.peek() == Some('|') {
             self.advance();
         }
@@ -228,18 +272,23 @@ impl Parser {
         let mut attrs = Vec::new();
 
         loop {
-            self.skip_whitespace();
+            self.skip_whitespace_and_comments();
             if self.peek() == Some(')') || self.peek().is_none() {
                 break;
             }
 
             let name = self.parse_identifier();
-            self.skip_whitespace();
+            if name.is_empty() {
+                self.advance();
+                continue;
+            }
+
+            self.skip_whitespace_and_comments();
 
             let mut value = String::new();
             if self.peek() == Some('=') {
                 self.advance();
-                self.skip_whitespace();
+                self.skip_whitespace_and_comments();
                 if self.peek() == Some('"') {
                     value = self.parse_string_literal();
                 }
@@ -247,7 +296,7 @@ impl Parser {
 
             attrs.push(Attribute { name, value });
 
-            self.skip_whitespace();
+            self.skip_whitespace_and_comments();
             if self.peek() == Some(',') {
                 self.advance();
             }
@@ -278,11 +327,13 @@ pub fn transpile(smkl_code: &str) -> String {
     let mut parser = Parser::new(smkl_code);
     let ast_nodes = parser.parse_document();
 
-    ast_nodes
+    let body = ast_nodes
         .iter()
         .map(|node| node.to_html(0))
         .collect::<Vec<String>>()
-        .join("\n")
+        .join("\n");
+
+    format!("<!DOCTYPE html>\n{}", body)
 }
 
 fn main() {
@@ -301,7 +352,7 @@ fn main() {
     };
 
     let source = fs::read_to_string(input_path)
-        .unwrap_or_else(|err| panic!("Erro ao ler o arquivo '{}': {}", input_path, err));
+        .unwrap_or_else(|err| panic!("Erro ao ler arquivo '{}': {}", input_path, err));
 
     let html_output = transpile(&source);
 
