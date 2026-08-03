@@ -1,3 +1,5 @@
-
-
-|img(src="aaaaa",class="id")|
+div(class="oi"){
+    h1{"gay"}
+    |img(src="aaaaa",class="id")| |br| |br|
+    "conteudo"
+}
