@@ -1,6 +1,11 @@
 [package]
-name = "STMTC"
+name = "smklc"
 version = "0.1.0"
 edition = "2024"
+authors = ["Mikael Menezes <mixaelmenezes@gmail.com>"]
+description = "O compilador oficial da Structured Markup Language (SMKL)"
+license = "MIT"
+repository = "https://github.com/MikaelMenez/smklc"
+readme = "README.md"
 
 [dependencies]

@@ -326,7 +326,6 @@ impl Parser {
 pub fn transpile(smkl_code: &str) -> String {
     let mut parser = Parser::new(smkl_code);
     let ast_nodes = parser.parse_document();
-
     let body = ast_nodes
         .iter()
         .map(|node| node.to_html(0))
